@@ -1,28 +1,3 @@
-/*
-function formatarTelefone(telefone) {
-    const numeros = telefone.replace(/\D/g, '');
-    
-    const numerosLimitados = numeros.slice(0, 11);
-    
-        if (numerosLimitados.length <= 10) {
-            return numerosLimitados
-            .replace(/(\d{2}))/, '($1) ')
-            .replace(/(\d{4})(\d{4})/, '$1-$2')
-        } else {
-            return numerosLimitados
-            .replace(/(\d{2})/, '($1) ')
-            .replace(/(\d{5})(\d{4})/, '$1-$2');
-    }
-}
-
-document.getElementById('telefone').addEventListener('input', function(e) {
-    const input = e.target;
-    const valorFormatado = formatarTelefone(input.value);
-    input.value = valorFormatado;
-});
-
-*/
-
 document.getElementById('formLogin').addEventListener('submit', function (event){
     event.preventDefault();
 
