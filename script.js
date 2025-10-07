@@ -39,7 +39,7 @@ document.getElementById('formLogin').addEventListener('submit', function (event)
     // Validade do Campo Telefone
     // Remove caracteres não númericos para contar os dígitos
     const numerosTelefone = telefone.replace(/\D/g, '');
-    if (numerosTelefone.length < 10 || numerosTelefone > 11) {
+    if (numerosTelefone.length < 10 || numerosTelefone.length > 11) {
         alert('Por favor, insira um número de telefone válido (10 a 11 dígitos).');
         return false;
     }
