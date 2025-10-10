@@ -1,5 +1,11 @@
-document.getElementById('formLogin').addEventListener('submit', function (event){
-    event.preventDefault();
+document.addEventListener('DOMContentLoaded', function (){
+
+    const form = document.getElementById('formLogin');
+
+    if (form) {
+
+    form.addEventListener('submit', function (event){
+        event.preventDefault();
 
     // Obtém os valores dos campos
     const nome = document.getElementById('nome').value.trim();
@@ -19,8 +25,13 @@ document.getElementById('formLogin').addEventListener('submit', function (event)
         return false;
     }
 
-    // Se passou pelas validações, pode enviar o formulário
-    alert('Login realizado com sucesso!\nNome: ' + nome + '\nTelefone: ' + telefone);
-    this.submit();
+    const dadosFormulario = {
+        nome: nome,
+        telefone: telefone
+    };
 
-});
+    const jsonString = JSON.stringify(dadosFormulario, null, 2);
+    console.log('JSON gerado: ', jsonString);
+
+    });
+}});
