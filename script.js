@@ -2,8 +2,6 @@ document.addEventListener('DOMContentLoaded', function (){
 
     const form = document.getElementById('formLogin');
 
-    if (form) {
-
     form.addEventListener('submit', function (event){
         event.preventDefault();
 
@@ -25,13 +23,15 @@ document.addEventListener('DOMContentLoaded', function (){
         return false;
     }
 
+    // Criacao do objeto com os dados
     const dadosFormulario = {
         nome: nome,
         telefone: telefone
     };
 
+    // Conversao para JSON, converte uma string para formato JSON
     const jsonString = JSON.stringify(dadosFormulario, null, 2);
     console.log('JSON gerado: ', jsonString);
 
     });
-}});
+});
