@@ -1,69 +1,85 @@
-document.addEventListener('DOMContentLoaded', function (){
-
+document.addEventListener('DOMContentLoaded', function () {
     const form = document.getElementById('formLogin');
+    const msgContainer = document.getElementById('mensagem-container'); // O novo elemento HTML
 
-    form.addEventListener('submit', function (event){
+    // Função para exibir mensagens na tela
+    function displayMessage(type, message) {
+        msgContainer.style.borderColor = type === 'success' ? '#4CAF50' : '#f44336';
+        msgContainer.style.backgroundColor = type === 'success' ? '#e8f5e9' : '#ffebee';
+        msgContainer.style.color = type === 'success' ? '#1b5e20' : '#b71c1c';
+        msgContainer.innerHTML = message;
+    }
+
+    // Função assíncrona para lidar com o login
+    async function fazerLogin(event) {
         event.preventDefault();
 
-    // Obtém os valores dos campos
-    const nome = document.getElementById('nome').value.trim();
-    const telefone = document.getElementById('telefone').value.trim();
+        // Limpa mensagens anteriores
+        msgContainer.innerHTML = '';
+        msgContainer.style.borderColor = 'transparent';
 
-    // Validade do Campo Nome
-    if (nome === '') {
-        alert('Por favor, preencha o campo Nome.');
-        return;
-    }
+        // 1. Obtém os valores dos campos
+        const nome = document.getElementById('nome').value.trim();
+        const telefone = document.getElementById('telefone').value.trim();
 
-    // Validade do Campo Telefone
-    // Remove caracteres não númericos para contar os dígitos
-    const numerosTelefone = telefone.replace(/\D/g, '');
-    if (numerosTelefone.length < 10 || numerosTelefone.length > 11) {
-        alert('Por favor, insira um número de telefone válido (10 a 11 dígitos).');
-        return false;
-    }
+        // 2. Validação Front-end
+        if (nome === '') {
+            displayMessage('error', 'Por favor, preencha o campo Nome.');
+            return;
+        }
+        const numerosTelefone = telefone.replace(/\D/g, '');
+        if (numerosTelefone.length < 10 || numerosTelefone.length > 11) {
+            displayMessage('error', 'Por favor, insira um número de telefone com 10 ou 11 dígitos (incluindo o DDD).');
+            return; 
+        }
 
-    // Criacao do objeto com os dados
-    const dadosFormulario = {
-        nome: nome,
-        telefone: numerosTelefone
-    };
+        const dadosFormulario = { nome: nome, telefone: numerosTelefone };
+        const apiUrl = 'http://localhost:8000/login'; 
 
-    // Conversao para JSON, converte uma string para formato JSON
-    const jsonString = JSON.stringify(dadosFormulario, null, 2);
-    console.log('JSON gerado: ', jsonString);
+        try {
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(dadosFormulario)
+            });
 
-    // ** NOVO: Integração com a API em FastAPI **
-        const apiUrl = 'http://localhost:8000/login'; // Substitua pela URL correta da sua API
+            const data = await response.json();
+            
+            if (response.ok) {
+                // SUCESSO (Status 200-299)
+                let successHtml = `<h4>✅ Login Bem-Sucedido!</h4>`;
+                successHtml += `<p><strong>Status do Sistema:</strong> ${data.message}</p>`;
+                successHtml += `<p><strong>Seu ID:</strong> ${data.aluno_id}</p>`;
+                
+                if (data.curso) {
+                    successHtml += `<p><strong>Curso Realizado:</strong> ${data.curso}</p>`;
+                } else {
+                    successHtml += `<p><strong>Próximo Passo:</strong> Prossiga para o questionário.</p>`;
+                }
 
-        fetch(apiUrl, {
-            method: 'POST', // Método que o FastAPI irá esperar
-            headers: {
-                'Content-Type': 'application/json', // Informa ao servidor que o corpo é JSON
-            },
-            body: jsonString // Os dados em formato JSON
-        })
-        .then(response => {
-            // Verifica se a resposta foi bem-sucedida (status 200-299)
-            if (!response.ok) {
-                // Se a resposta for um erro (ex: 401 Unauthorized), lança um erro
-                throw new Error(`Erro HTTP: ${response.status}`);
+                displayMessage('success', successHtml);
+                
+                // Ex: Redirecionar
+                // setTimeout(() => window.location.href = '/questionario.html', 3000); 
+
+            } else {
+                // ERRO (Status 4xx ou 5xx)
+                let errorMessage = "Erro desconhecido. Por favor, tente novamente.";
+
+                if (data && data.detail) {
+                    errorMessage = data.detail; 
+                } 
+
+                // Exibe a mensagem de erro detalhada do FastAPI
+                displayMessage('error', `<h4>❌ Erro ao Acessar (${response.status})</h4><p>${errorMessage}</p>`);
             }
-            // Tenta analisar a resposta como JSON
-            return response.json();
-        })
-        .then(data => {
-            // Lida com a resposta de sucesso da API
-            console.log('Sucesso na API:', data);
-            alert(`Login bem-sucedido! Mensagem: ${data.message}`);
-            // Aqui você faria o redirecionamento ou outras ações
-        })
-        .catch((error) => {
-            // Lida com erros de rede ou erros lançados acima
-            console.error('Erro ao enviar dados para a API:', error);
-            alert('Erro ao tentar fazer login. Verifique o console para mais detalhes.');
-        });
-        // ** FIM DA NOVO **
 
-    });
+        } catch (error) {
+            // Erros de rede (servidor offline, CORS, etc.)
+            displayMessage('error', '<h4>❌ Erro de Conexão</h4><p>Não foi possível conectar ao servidor. Verifique se o backend está rodando.</p>');
+            console.error('Erro de rede:', error);
+        }
+    }
+
+    form.addEventListener('submit', fazerLogin);
 });
